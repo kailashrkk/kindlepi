@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+*.epub
+models/
+*.db
+.env
