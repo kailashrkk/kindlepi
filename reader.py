@@ -143,7 +143,7 @@ class Reader:
 
     def _enter_reading(self, epub_path: str):
         self.state = ReaderState.READING
-        self._show_message("Opening book...", detail="Parsing epub, please wait.")
+        pass
 
         self.parser = EpubParser(epub_path)
         self.page_state, is_new = load_or_create_state(epub_path)

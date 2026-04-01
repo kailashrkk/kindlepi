@@ -79,6 +79,7 @@ class EinkDisplay:
         img = img.rotate(90, expand=True)
         img = img.convert("RGB").convert("L")
         img.save(TMP_BMP, format="BMP")
+        import time; time.sleep(0.5)
         subprocess.run([DRIVER, VCOM, MODE, TMP_BMP], check=True)
 
     def show_page(

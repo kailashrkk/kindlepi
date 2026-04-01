@@ -1,18 +1,6 @@
-"""
-buttons.py -- GPIO button handler for KindlePi.
-
-STUB VERSION: reads from a named pipe /tmp/kindlepi_input
-Send commands from a second terminal:
-    echo n > /tmp/kindlepi_input   # next
-    echo p > /tmp/kindlepi_input   # prev
-    echo a > /tmp/kindlepi_input   # AI / confirm
-    echo b > /tmp/kindlepi_input   # back
-    echo q > /tmp/kindlepi_input   # quit
-"""
-
 import threading
-from enum import Enum, auto
 import os
+from enum import Enum, auto
 
 PIPE_PATH = "/tmp/kindlepi_input"
 
@@ -37,26 +25,33 @@ class ButtonHandler:
     def start(self):
         if not os.path.exists(PIPE_PATH):
             os.mkfifo(PIPE_PATH)
+        os.chmod(PIPE_PATH, 0o666)
         self._running = True
         self._thread  = threading.Thread(target=self._poll_pipe, daemon=True)
         self._thread.start()
+        print(f"[buttons] thread started, watching {PIPE_PATH}")
 
     def stop(self):
         self._running = False
 
     def _poll_pipe(self):
+        print("[buttons] poll thread running")
         while self._running:
             try:
+                print("[buttons] opening pipe...")
                 with open(PIPE_PATH, "r") as pipe:
+                    print("[buttons] pipe opened, waiting for input")
                     for line in pipe:
-                        ch    = line.strip().lower()
+                        ch = line.strip().lower()
+                        print(f"[buttons] got: {ch!r}")
                         event = self._map_key(ch)
                         if event and self._callback:
                             self._callback(event)
                         if event == ButtonEvent.QUIT:
                             return
-            except Exception:
-                pass
+                print("[buttons] pipe closed, reopening")
+            except Exception as e:
+                print(f"[buttons] error: {e}")
 
     @staticmethod
     def _map_key(ch: str):
